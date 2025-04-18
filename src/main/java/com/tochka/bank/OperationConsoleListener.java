@@ -16,17 +16,26 @@ public class OperationConsoleListener {
         this.processorMap = processorMap;
     }
 
+    public void start() {
+        System.out.println("Console listener started");
+    }
+
+    public void endListen() {
+        System.out.println("Console listener end listen");
+
+    }
+
     public void listenUpdates() {
-        System.out.println("Please type operations:\n");
         while (true) {
             ConsoleOperationType operationType = listenNextOperation();
             processNextOperation(operationType);
         }
     }
 
-
     private ConsoleOperationType listenNextOperation() {
-        System.out.println("Please type operations: ");
+        System.out.println("\nPlease type operations: ");
+        printAllAvailableOperations();
+        System.out.println();
         while (true) {
             var nextOperation = scanner.nextLine();
             try {
@@ -35,6 +44,10 @@ public class OperationConsoleListener {
                 System.out.println("No such command found");
             }
         }
+    }
+
+    private void printAllAvailableOperations() {
+        processorMap.keySet().forEach(System.out::println);
     }
 
     private void processNextOperation(ConsoleOperationType operation) {

@@ -42,4 +42,33 @@ public class AccountService {
         }
         account.setMoneyAmount(account.getMoneyAmount() + moneyToDeposit);
     }
+
+    public void withdrawFromAccount(int accountId, int amountToWithdraw) {
+        Account account = findAccountById(accountId).orElseThrow(() -> new IllegalArgumentException("No such account=%s".formatted(accountId)));
+        if (amountToWithdraw > account.getMoneyAmount()) {
+            throw new IllegalArgumentException("Cannot withdraw from account: %s, moneyAmount= %s, attemptedWithdraw= %s "
+                    .formatted(accountId, account.getMoneyAmount(), amountToWithdraw));
+        }
+        if (amountToWithdraw <= 0) {
+            throw new IllegalArgumentException("Cannot withdraw not positive amount");
+        }
+        account.setMoneyAmount(account.getMoneyAmount() - amountToWithdraw);
+
+    }
+
+    public Account closeAccount(int accountId) {
+        Account accountToRemove = findAccountById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(accountId)));
+        List<Account> accountList = getAllUserAccounts(accountToRemove.getUserId());
+        if (accountList.size() == 1) {
+            throw new IllegalArgumentException("Cannot close the only one account");
+        }
+        Account accountToDeposit = accountList.stream()
+                .filter(acc -> acc.getId() != accountId)
+                .findFirst()
+                .orElseThrow();
+        accountToDeposit.setMoneyAmount(accountToDeposit.getMoneyAmount() + accountToRemove.getMoneyAmount());
+        accountMap.remove(accountId);
+        return accountToRemove;
+    }
 }

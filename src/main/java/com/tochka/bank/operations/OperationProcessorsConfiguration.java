@@ -1,9 +1,7 @@
 package com.tochka.bank.operations;
 
 import com.tochka.bank.account.AccountService;
-import com.tochka.bank.operations.processors.CreateAccountProcessor;
-import com.tochka.bank.operations.processors.CreateUserProcessor;
-import com.tochka.bank.operations.processors.ShowAllUsersProcessor;
+import com.tochka.bank.operations.processors.*;
 import com.tochka.bank.user.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,5 +34,33 @@ public class OperationProcessorsConfiguration {
     ) {
         return new ShowAllUsersProcessor(userService);
     }
+
+    @Bean
+    public AccountDepositProcessor accountDepositProcessor(
+            Scanner scanner,
+            AccountService accountService
+    ) {
+        return new AccountDepositProcessor(scanner, accountService);
+    }
+
+    @Bean
+    public AccountWithdrawProcessor accountWithdrawProcessor(
+            Scanner scanner,
+            AccountService accountService
+    ) {
+        return new AccountWithdrawProcessor(scanner, accountService);
+    }
+
+    @Bean
+    public CloseAccountProcessor closeAccountProcessor(
+            Scanner scanner,
+            AccountService accountService,
+            UserService userService
+    ) {
+        return new CloseAccountProcessor(scanner, accountService, userService);
+    }
+
+
+
 
 }

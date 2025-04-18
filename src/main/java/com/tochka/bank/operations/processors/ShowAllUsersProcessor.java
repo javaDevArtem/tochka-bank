@@ -1,5 +1,6 @@
 package com.tochka.bank.operations.processors;
 
+import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
 import com.tochka.bank.user.User;
 import com.tochka.bank.user.UserService;
@@ -13,6 +14,11 @@ public class ShowAllUsersProcessor implements OperationCommandProcessor {
 
     public ShowAllUsersProcessor(UserService userService) {
         this.userService = userService;
+    }
+
+    @Override
+    public ConsoleOperationType getOperationType() {
+        return ConsoleOperationType.SHOW_ALL_USERS;
     }
 
     @Override

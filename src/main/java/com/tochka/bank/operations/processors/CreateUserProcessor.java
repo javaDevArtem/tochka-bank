@@ -1,5 +1,6 @@
 package com.tochka.bank.operations.processors;
 
+import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
 import com.tochka.bank.user.User;
 import com.tochka.bank.user.UserService;
@@ -14,6 +15,11 @@ public class CreateUserProcessor implements OperationCommandProcessor {
     public CreateUserProcessor(Scanner scanner, UserService userService) {
         this.scanner = scanner;
         this.userService = userService;
+    }
+
+    @Override
+    public ConsoleOperationType getOperationType() {
+        return ConsoleOperationType.USER_CREATE;
     }
 
     @Override

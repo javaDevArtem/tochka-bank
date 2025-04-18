@@ -7,6 +7,9 @@ public class App {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext context =
                 new AnnotationConfigApplicationContext("com.tochka.bank");
-        context.getBean(OperationConsoleListener.class).listenUpdates();
+        OperationConsoleListener operationConsoleListener = context.getBean(OperationConsoleListener.class);
+        operationConsoleListener.start();
+        operationConsoleListener.listenUpdates();
+        operationConsoleListener.endListen();
     }
 }

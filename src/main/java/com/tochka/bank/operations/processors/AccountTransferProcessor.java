@@ -9,13 +9,13 @@ import com.tochka.bank.user.UserService;
 
 import java.util.Scanner;
 
-public class CreateAccountProcessor implements OperationCommandProcessor {
+public class AccountTransferProcessor implements OperationCommandProcessor {
 
     private final Scanner scanner;
     private final UserService userService;
     private final AccountService accountService;
 
-    public CreateAccountProcessor(Scanner scanner, UserService userService, AccountService accountService) {
+    public AccountTransferProcessor(Scanner scanner, UserService userService, AccountService accountService) {
         this.scanner = scanner;
         this.userService = userService;
         this.accountService = accountService;
@@ -23,7 +23,7 @@ public class CreateAccountProcessor implements OperationCommandProcessor {
 
     @Override
     public ConsoleOperationType getOperationType() {
-        return ConsoleOperationType.ACCOUNT_CREATE;
+        return ConsoleOperationType.ACCOUNT_TRANSFER;
     }
 
     @Override
