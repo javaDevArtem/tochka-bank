@@ -6,7 +6,7 @@ import com.tochka.bank.user.User;
 
 import java.util.*;
 
-public class UserSevice {
+public class UserService {
 
     private final Map<Integer, User> userMap;
     private Set<String> loginsSet;
@@ -14,7 +14,7 @@ public class UserSevice {
 
     private int idCounter;
 
-    public UserSevice(AccountService accountService) {
+    public UserService(AccountService accountService) {
         this.accountService = accountService;
         this.loginsSet = new HashSet<>();
         this.userMap = new HashMap<>();

@@ -1,8 +1,7 @@
 package com.tochka.bank;
 
 import com.tochka.bank.account.AccountService;
-import com.tochka.bank.user.User;
-import com.tochka.bank.user.UserSevice;
+import com.tochka.bank.user.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,15 +16,15 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public OperationConsoleListener operationConsoleListener(Scanner scanner, AccountService accountService, UserSevice userSevice
+    public OperationConsoleListener operationConsoleListener(Scanner scanner, AccountService accountService, UserService userService
     ) {
-        return new OperationConsoleListener(scanner, accountService, userSevice);
+        return new OperationConsoleListener(scanner, accountService, userService);
 
     }
 
     @Bean
-    public UserSevice userSevice(AccountService accountService) {
-        return new UserSevice(accountService);
+    public UserService userSevice(AccountService accountService) {
+        return new UserService(accountService);
     }
 
     @Bean
