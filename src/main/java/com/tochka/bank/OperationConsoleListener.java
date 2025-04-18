@@ -1,64 +1,50 @@
 package com.tochka.bank;
 
-import com.tochka.bank.account.Account;
-import com.tochka.bank.account.AccountService;
-import com.tochka.bank.user.User;
-import com.tochka.bank.user.UserService;
+import com.tochka.bank.operations.ConsoleOperationType;
+import com.tochka.bank.operations.OperationCommandProcessor;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class OperationConsoleListener {
 
     private final Scanner scanner;
-    private final AccountService accountService;
-    private final UserService userService;
+    private final Map<ConsoleOperationType, OperationCommandProcessor> processorMap;
 
-    public OperationConsoleListener(Scanner scanner, AccountService accountService, UserService userService) {
+    public OperationConsoleListener(Scanner scanner, Map<ConsoleOperationType, OperationCommandProcessor> processorMap) {
         this.scanner = scanner;
-        this.accountService = accountService;
-        this.userService = userService;
+        this.processorMap = processorMap;
     }
 
     public void listenUpdates() {
-        String operationType = "";
+        System.out.println("Please type operations:\n");
         while (true) {
+            ConsoleOperationType operationType = listenNextOperation();
+            processNextOperation(operationType);
+        }
+    }
+
+
+    private ConsoleOperationType listenNextOperation() {
+        System.out.println("Please type operations: ");
+        while (true) {
+            var nextOperation = scanner.nextLine();
             try {
-                operationType = listenNextOperation();
-                processNextOperation(operationType);
-            } catch (Exception e) {
-                System.out.printf("Error executing command %s: error =%s%n", operationType, e.getMessage());
+                return ConsoleOperationType.valueOf(nextOperation);
+            } catch (IllegalArgumentException e) {
+                System.out.println("No such command found");
             }
         }
     }
 
-    private String listenNextOperation() {
-        System.out.println("Please type operations:\n");
-        return scanner.nextLine();
-    }
-
-    private void processNextOperation(String operation) {
-        if (operation.equals(OperationCommand.USER_CREATE.toString())) {
-            System.out.println("Enter login for new User:\n");
-            String login = scanner.nextLine();
-            User user = userService.createUser(login);
-            System.out.println("User created =" + user.toString());
-        } else if (operation.equals(OperationCommand.SHOW_ALL_USERS.toString())) {
-            List<User> userList = userService.getAllUsers();
-            System.out.println("List of all users:\n");
-
-            userList.forEach(System.out::println);
-        } else if (operation.equals(OperationCommand.ACCOUNT_CREATE.toString())) {
-            System.out.println("Enter the user id for which to create an account:\n");
-            int userId = Integer.parseInt(scanner.nextLine());
-            User user = userService.findUserById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(userId)));
-            Account account = accountService.createAccount(user);
-            user.getAccountList().add(account);
-            System.out.printf("Account created with id: %s for user: %s\n", account.getId(), user.getLogin());
-
-        } else {
-            System.out.println("Not found operation");
+    private void processNextOperation(ConsoleOperationType operation) {
+        try {
+            OperationCommandProcessor processor = processorMap.get(operation);
+            processor.processOperation();
+        } catch (Exception e) {
+            System.out.printf("Error executing command %s: error =%s%n", operation, e.getMessage());
         }
     }
+
+
 }
