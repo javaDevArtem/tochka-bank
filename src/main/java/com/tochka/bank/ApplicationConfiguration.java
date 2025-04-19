@@ -1,10 +1,10 @@
 package com.tochka.bank;
 
+import com.tochka.bank.account.AccountProperties;
 import com.tochka.bank.account.AccountService;
 import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
 import com.tochka.bank.user.UserService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -45,9 +45,15 @@ public class ApplicationConfiguration {
 
     @Bean
     public AccountService accountService(
-            @Value("${account.default-amount}") int defaultAmount,
-            @Value("${account.transfer-commission}") double transferCommission
+            AccountProperties accountProperties
     ) {
-        return new AccountService(defaultAmount, transferCommission);
+        return new AccountService(accountProperties);
+    }
+
+    @Bean
+    public ConsoleListenerStarter consoleListenerStarter(
+            OperationConsoleListener consoleListener
+    ) {
+        return new ConsoleListenerStarter(consoleListener);
     }
 }

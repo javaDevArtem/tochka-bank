@@ -10,19 +10,17 @@ public class AccountService {
 
     private final Map<Integer, Account> accountMap;
     private int idCounter;
-    private final int defaultAccountAmount;
-    private final double transferCommission;
+    private final AccountProperties accountProperties;
 
-    public AccountService(int defaultAccountAmount, double transferCommission) {
+    public AccountService(AccountProperties accountProperties) {
+        this.accountProperties = accountProperties;
         this.accountMap = new HashMap<>();
         this.idCounter = 0;
-        this.defaultAccountAmount = defaultAccountAmount;
-        this.transferCommission = transferCommission;
     }
 
     public Account createAccount(User user) {
         idCounter++;
-        Account account = new Account(idCounter, user.getId(), 0);
+        Account account = new Account(idCounter, user.getId(), accountProperties.getDefaultAccountAmount());
         accountMap.put(account.getId(), account);
         return account;
     }
@@ -88,7 +86,7 @@ public class AccountService {
                     .formatted(accountFrom, accountFrom.getMoneyAmount(), amountToTransfer));
         }
         int totalAmountToDeposit = accountTo.getUserId() != accountFrom.getUserId()
-                ? (int) (amountToTransfer * (1 - transferCommission))
+                ? (int) (amountToTransfer * (1 - accountProperties.getTransferCommission()))
                 : amountToTransfer;
         accountFrom.setMoneyAmount(accountFrom.getMoneyAmount() - amountToTransfer);
         accountTo.setMoneyAmount(accountTo.getMoneyAmount() + totalAmountToDeposit);

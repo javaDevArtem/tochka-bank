@@ -1,8 +1,10 @@
 package com.tochka.bank.operations;
 
+import com.tochka.bank.account.AccountProperties;
 import com.tochka.bank.account.AccountService;
 import com.tochka.bank.operations.processors.*;
 import com.tochka.bank.user.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -66,6 +68,14 @@ public class OperationProcessorsConfiguration {
             AccountService accountService
     ) {
         return new AccountTransferProcessor(scanner, accountService);
+    }
+
+    @Bean
+    public AccountProperties accountProperties(
+            @Value("${account.default-amount}") int defaultAmount,
+            @Value("${account.transfer-commission}") double transferCommission
+    ) {
+        return new AccountProperties(defaultAmount, transferCommission);
     }
 
 }
