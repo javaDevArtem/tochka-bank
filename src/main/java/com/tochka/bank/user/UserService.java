@@ -2,7 +2,6 @@ package com.tochka.bank.user;
 
 import com.tochka.bank.account.Account;
 import com.tochka.bank.account.AccountService;
-import com.tochka.bank.user.User;
 
 import java.util.*;
 

@@ -1,23 +1,17 @@
 package com.tochka.bank.operations.processors;
 
-import com.tochka.bank.account.Account;
 import com.tochka.bank.account.AccountService;
 import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
-import com.tochka.bank.user.User;
-import com.tochka.bank.user.UserService;
-
 import java.util.Scanner;
 
 public class AccountTransferProcessor implements OperationCommandProcessor {
 
     private final Scanner scanner;
-    private final UserService userService;
     private final AccountService accountService;
 
-    public AccountTransferProcessor(Scanner scanner, UserService userService, AccountService accountService) {
+    public AccountTransferProcessor(Scanner scanner, AccountService accountService) {
         this.scanner = scanner;
-        this.userService = userService;
         this.accountService = accountService;
     }
 
@@ -28,12 +22,14 @@ public class AccountTransferProcessor implements OperationCommandProcessor {
 
     @Override
     public void processOperation() {
-        System.out.println("Enter the user id for which to create an account:\n");
-        int userId = Integer.parseInt(scanner.nextLine());
-        User user = userService.findUserById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(userId)));
-        Account account = accountService.createAccount(user);
-        user.getAccountList().add(account);
-        System.out.printf("Account created with id: %s for user: %s\n", account.getId(), user.getLogin());
+        System.out.println("Enter source account id:");
+        int fromAccountId = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter destination account id:");
+        int toAccountId = Integer.parseInt(scanner.nextLine());
+        System.out.println("Enter amount to transfer:");
+        int amountToTransfer = Integer.parseInt(scanner.nextLine());
+        accountService.transfer(fromAccountId, toAccountId, amountToTransfer);
+        System.out.println("Successfully transferred %s from accountId: %s to accountId: %s"
+                .formatted(amountToTransfer, fromAccountId, toAccountId));
     }
 }

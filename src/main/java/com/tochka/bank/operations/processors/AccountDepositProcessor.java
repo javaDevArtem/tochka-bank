@@ -1,12 +1,8 @@
 package com.tochka.bank.operations.processors;
 
-import com.tochka.bank.account.Account;
 import com.tochka.bank.account.AccountService;
 import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
-import com.tochka.bank.user.User;
-import com.tochka.bank.user.UserService;
-
 import java.util.Scanner;
 
 public class AccountDepositProcessor implements OperationCommandProcessor {
