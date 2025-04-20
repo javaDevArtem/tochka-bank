@@ -6,9 +6,11 @@ import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
 import com.tochka.bank.user.User;
 import com.tochka.bank.user.UserService;
+import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
+@Component
 public class CloseAccountProcessor implements OperationCommandProcessor {
 
     private final Scanner scanner;

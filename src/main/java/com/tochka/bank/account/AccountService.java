@@ -1,11 +1,14 @@
 package com.tochka.bank.account;
 
 import com.tochka.bank.user.User;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Service
 public class AccountService {
 
     private final Map<Integer, Account> accountMap;

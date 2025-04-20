@@ -1,12 +1,17 @@
 package com.tochka.bank.account;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+@Component
 public class AccountProperties {
 
     private final int defaultAccountAmount;
     private final double transferCommission;
 
-    public AccountProperties(int defaultAmount, double transferCommission) {
-        this.defaultAccountAmount = defaultAmount;
+    public AccountProperties(@Value("${account.default-amount}") int defaultAccountAmount,
+                             @Value("${account.transfer-commission}") double transferCommission) {
+        this.defaultAccountAmount = defaultAccountAmount;
         this.transferCommission = transferCommission;
     }
 

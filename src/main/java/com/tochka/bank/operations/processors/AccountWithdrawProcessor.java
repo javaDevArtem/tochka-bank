@@ -3,9 +3,11 @@ package com.tochka.bank.operations.processors;
 import com.tochka.bank.account.AccountService;
 import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
+import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
+@Component
 public class AccountWithdrawProcessor implements OperationCommandProcessor {
 
     private final Scanner scanner;

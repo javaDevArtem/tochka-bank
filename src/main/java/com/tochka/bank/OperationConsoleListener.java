@@ -2,18 +2,26 @@ package com.tochka.bank;
 
 import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
+@Component
 public class OperationConsoleListener {
 
     private final Scanner scanner;
     private final Map<ConsoleOperationType, OperationCommandProcessor> processorMap;
 
-    public OperationConsoleListener(Scanner scanner, Map<ConsoleOperationType, OperationCommandProcessor> processorMap) {
+    public OperationConsoleListener(Scanner scanner, List<OperationCommandProcessor> processorList) {
         this.scanner = scanner;
-        this.processorMap = processorMap;
+        this.processorMap = processorList.stream()
+                .collect(Collectors.toMap(
+                        processor -> processor.getOperationType(),
+                        processor -> processor
+                ));
     }
 
     public void start() {

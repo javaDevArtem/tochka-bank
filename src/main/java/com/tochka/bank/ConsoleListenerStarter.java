@@ -2,7 +2,9 @@ package com.tochka.bank;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ConsoleListenerStarter {
 
     private final OperationConsoleListener consoleListener;

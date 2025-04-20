@@ -2,6 +2,7 @@ package com.tochka.bank.user;
 
 import com.tochka.bank.account.Account;
 import com.tochka.bank.account.AccountService;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+@Service
 public class UserService {
 
     private final Map<Integer, User> userMap;

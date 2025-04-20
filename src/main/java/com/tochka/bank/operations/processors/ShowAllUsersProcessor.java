@@ -4,10 +4,11 @@ import com.tochka.bank.operations.ConsoleOperationType;
 import com.tochka.bank.operations.OperationCommandProcessor;
 import com.tochka.bank.user.User;
 import com.tochka.bank.user.UserService;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-
+@Component
 public class ShowAllUsersProcessor implements OperationCommandProcessor {
 
     private final UserService userService;
