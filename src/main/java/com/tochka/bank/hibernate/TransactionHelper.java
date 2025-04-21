@@ -4,9 +4,11 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
+import org.springframework.stereotype.Component;
 
 import java.util.function.Supplier;
 
+@Component
 public class TransactionHelper {
 
     private final SessionFactory sessionFactory;
@@ -21,7 +23,6 @@ public class TransactionHelper {
         if (!transaction.getStatus().equals(TransactionStatus.NOT_ACTIVE)) {
             return action.get();
         }
-
         try {
             session.beginTransaction();
             T returnedValue = action.get();
@@ -30,6 +31,8 @@ public class TransactionHelper {
         } catch (Exception e) {
             transaction.rollback();
             throw e;
+        } finally {
+            session.close();
         }
     }
 }

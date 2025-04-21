@@ -1,19 +1,14 @@
 package com.tochka.bank.user;
 
-import com.tochka.bank.account.Account;
 import com.tochka.bank.account.AccountService;
+import com.tochka.bank.hibernate.TransactionHelper;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -22,15 +17,17 @@ public class UserService {
 
     private SessionFactory sessionFactory;
 
-    public UserService(AccountService accountService, SessionFactory sessionFactory) {
+    private final TransactionHelper transactionHelper;
+
+    public UserService(AccountService accountService, SessionFactory sessionFactory, TransactionHelper transactionHelper) {
         this.accountService = accountService;
         this.sessionFactory = sessionFactory;
+        this.transactionHelper = transactionHelper;
     }
 
     public User createUser(String login) {
-        try (Session session = sessionFactory.getCurrentSession()) {
-            Transaction transaction = session.beginTransaction();
-
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
             User existedUser = session.createQuery("FROM User WHERE login = :login", User.class)
                     .setParameter("login", login)
                     .getSingleResultOrNull();
@@ -40,10 +37,8 @@ public class UserService {
             User user = new User(null, login, new ArrayList<>());
             session.persist(user);
             accountService.createAccount(user);
-            transaction.commit();
             return user;
-
-        }
+        });
     }
 
     public Optional<User> findUserById(Long id) {
@@ -55,7 +50,7 @@ public class UserService {
 
     public List<User> getAllUsers() {
         try (Session session = sessionFactory.openSession()) {
-            return session.createQuery("FROM User", User.class).list();
+            return session.createQuery("SELECT u FROM  User u LEFT JOIN FETCH u.accountList", User.class).list();
         }
     }
 }
