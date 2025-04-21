@@ -1,52 +1,56 @@
 package com.tochka.bank.user;
 
-import com.tochka.bank.account.Account;
 import com.tochka.bank.account.AccountService;
+import com.tochka.bank.hibernate.TransactionHelper;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserService {
 
-    private final Map<Integer, User> userMap;
-    private Set<String> loginsSet;
     private AccountService accountService;
 
-    private int idCounter;
+    private SessionFactory sessionFactory;
 
-    public UserService(AccountService accountService) {
+    private final TransactionHelper transactionHelper;
+
+    public UserService(AccountService accountService, SessionFactory sessionFactory, TransactionHelper transactionHelper) {
         this.accountService = accountService;
-        this.loginsSet = new HashSet<>();
-        this.userMap = new HashMap<>();
-        this.idCounter = 0;
+        this.sessionFactory = sessionFactory;
+        this.transactionHelper = transactionHelper;
     }
 
     public User createUser(String login) {
-        if (loginsSet.contains(login)) {
-            throw new IllegalArgumentException("User with this login = %s is already exist".formatted(login));
-        }
-        loginsSet.add(login);
-
-        idCounter++;
-        User newUser = new User(idCounter, login, new ArrayList<>());
-        Account newAccount = accountService.createAccount(newUser);
-        newUser.getAccountList().add(newAccount);
-        userMap.put(newUser.getId(), newUser);
-        return newUser;
+        return transactionHelper.executeInTransaction(() -> {
+            Session session = sessionFactory.getCurrentSession();
+            User existedUser = session.createQuery("FROM User WHERE login = :login", User.class)
+                    .setParameter("login", login)
+                    .getSingleResultOrNull();
+            if (existedUser != null) {
+                throw new IllegalArgumentException("User with this login = %s is already exist".formatted(login));
+            }
+            User user = new User(null, login, new ArrayList<>());
+            session.persist(user);
+            accountService.createAccount(user);
+            return user;
+        });
     }
 
-    public Optional<User> findUserById(int id) {
-        return Optional.ofNullable(userMap.get(id));
+    public Optional<User> findUserById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            User user = session.get(User.class, id);
+            return Optional.of(user);
+        }
     }
 
     public List<User> getAllUsers() {
-        return userMap.values().stream().toList();
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery("SELECT u FROM  User u LEFT JOIN FETCH u.accountList", User.class).list();
+        }
     }
 }
