@@ -1,45 +1,40 @@
 package com.tochka.bank.account;
 
 import com.tochka.bank.user.User;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class AccountService {
 
-    private final Map<Integer, Account> accountMap;
-    private int idCounter;
     private final AccountProperties accountProperties;
+    private final SessionFactory sessionFactory;
 
-    public AccountService(AccountProperties accountProperties) {
+    public AccountService(AccountProperties accountProperties, SessionFactory sessionFactory) {
         this.accountProperties = accountProperties;
-        this.accountMap = new HashMap<>();
-        this.idCounter = 0;
+        this.sessionFactory = sessionFactory;
     }
 
     public Account createAccount(User user) {
-        idCounter++;
-        Account account = new Account(idCounter, user.getId(), accountProperties.getDefaultAccountAmount());
-        accountMap.put(account.getId(), account);
+        Session session = sessionFactory.getCurrentSession();
+        Account account = new Account(null, user, accountProperties.getDefaultAccountAmount());
+        session.persist(account);
         return account;
     }
 
-    public Optional<Account> findAccountById(int id) {
-        return Optional.ofNullable(accountMap.get(id));
+    public Optional<Account> findAccountById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            Account account = session.get(Account.class, id);
+            return Optional.ofNullable(account);
+        }
     }
 
-    public List<Account> getAllUserAccounts(int userId) {
-        return accountMap.values()
-                .stream()
-                .filter(account -> account.getUserId() == userId)
-                .toList();
-    }
-
-    public void depositAccount(int accountId, int moneyToDeposit) {
+    public void depositAccount(Long accountId, int moneyToDeposit) {
         Account account = findAccountById(accountId).orElseThrow(() -> new IllegalArgumentException("No such account=%s".formatted(accountId)));
         if (moneyToDeposit <= 0) {
             throw new IllegalArgumentException("Cannot deposit not positive amount");
@@ -47,7 +42,7 @@ public class AccountService {
         account.setMoneyAmount(account.getMoneyAmount() + moneyToDeposit);
     }
 
-    public void withdrawFromAccount(int accountId, int amountToWithdraw) {
+    public void withdrawFromAccount(Long accountId, int amountToWithdraw) {
         Account account = findAccountById(accountId).orElseThrow(() -> new IllegalArgumentException("No such account=%s".formatted(accountId)));
         if (amountToWithdraw > account.getMoneyAmount()) {
             throw new IllegalArgumentException("Cannot withdraw from account: %s, moneyAmount= %s, attemptedWithdraw= %s "
@@ -60,23 +55,26 @@ public class AccountService {
 
     }
 
-    public Account closeAccount(int accountId) {
-        Account accountToRemove = findAccountById(accountId)
-                .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(accountId)));
-        List<Account> accountList = getAllUserAccounts(accountToRemove.getUserId());
-        if (accountList.size() == 1) {
-            throw new IllegalArgumentException("Cannot close the only one account");
+    public Account closeAccount(Long accountId) {
+        try (Session session = sessionFactory.openSession()) {
+            Account accountToRemove = findAccountById(accountId)
+                    .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(accountId)));
+            List<Account> accountList = accountToRemove.getUser().getAccountList();
+            if (accountList.size() == 1) {
+                throw new IllegalArgumentException("Cannot close the only one account");
+            }
+            Account accountToDeposit = accountList.stream()
+                    .filter(acc -> !Objects.equals(acc.getId(), accountId))
+                    .findFirst()
+                    .orElseThrow();
+            accountToDeposit.setMoneyAmount(accountToDeposit.getMoneyAmount() + accountToRemove.getMoneyAmount());
+            session.remove(accountToRemove);
+            return accountToRemove;
         }
-        Account accountToDeposit = accountList.stream()
-                .filter(acc -> acc.getId() != accountId)
-                .findFirst()
-                .orElseThrow();
-        accountToDeposit.setMoneyAmount(accountToDeposit.getMoneyAmount() + accountToRemove.getMoneyAmount());
-        accountMap.remove(accountId);
-        return accountToRemove;
+
     }
 
-    public void transfer(int fromAccountId, int toAccountId, int amountToTransfer) {
+    public void transfer(Long fromAccountId, Long toAccountId, int amountToTransfer) {
         Account accountFrom = findAccountById(fromAccountId)
                 .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(fromAccountId)));
         Account accountTo = findAccountById(toAccountId)
@@ -88,7 +86,7 @@ public class AccountService {
             throw new IllegalArgumentException("Cannot transfer from account: %s, moneyAmount= %s, attemptedTransfer= %s "
                     .formatted(accountFrom, accountFrom.getMoneyAmount(), amountToTransfer));
         }
-        int totalAmountToDeposit = accountTo.getUserId() != accountFrom.getUserId()
+        int totalAmountToDeposit = !Objects.equals(accountTo.getUser().getId(), accountFrom.getUser().getId())
                 ? (int) (amountToTransfer * (1 - accountProperties.getTransferCommission()))
                 : amountToTransfer;
         accountFrom.setMoneyAmount(accountFrom.getMoneyAmount() - amountToTransfer);

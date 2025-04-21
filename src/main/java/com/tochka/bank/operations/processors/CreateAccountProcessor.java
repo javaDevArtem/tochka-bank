@@ -31,7 +31,7 @@ public class CreateAccountProcessor implements OperationCommandProcessor {
     @Override
     public void processOperation() {
         System.out.println("Enter the user id for which to create an account:\n");
-        int userId = Integer.parseInt(scanner.nextLine());
+        Long userId = Long.parseLong(scanner.nextLine());
         User user = userService.findUserById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("No such user with id=%s".formatted(userId)));
         Account account = accountService.createAccount(user);
